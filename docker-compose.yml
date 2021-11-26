@@ -1,0 +1,255 @@
+version: "3.9"
+##################################################################
+networks:
+  proxynet:
+    name: proxynet
+    external: true
+  socketproxynet:
+    name: socketproxynet
+    external: true
+
+##################################################################
+secrets:
+  IONOS_API_KEY:
+    file: ./secrets/IONOS_API_KEY
+  #----------------------------------------------------#
+  PIHOLE_WEBPASSWORD:
+    file: ./secrets/PIHOLE_WEBPASSWORD
+  #----------------------------------------------------#
+  BITWARDENADMINTOKEN:
+    file: ./secrets/BITWARDENADMINTOKEN
+  BITWARDENSMTPHOST:
+    file: ./secrets/BITWARDENSMTPHOST
+  BITWARDENSMTPUSER:
+    file: ./secrets/BITWARDENSMTPUSER
+  BITWARDENSMTPPASSWORD:
+    file: ./secrets/BITWARDENSMTPPASSWORD
+  #----------------------------------------------------#
+
+##################################################################
+services:
+  traefik:
+    image: "traefik:latest"
+    container_name: 'traefik'
+    hostname: 'traefik'
+    restart: 'unless-stopped'
+    command:
+      - --log.level=Error
+      - --api.insecure=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.watch=true
+      - --providers.docker.endpoint=tcp://socketproxy:2375
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entryPoint.to=websecure
+      - --entrypoints.web.http.redirections.entryPoint.scheme=https
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.websecure.http.tls=true
+      - --entrypoints.websecure.http.tls.certResolver=leresolver
+      - --entrypoints.websecure.http.tls.domains[0].main=${DOMAIN}
+      - --entrypoints.websecure.http.tls.domains[0].sans=*.${DOMAIN}
+      - --certificatesresolvers.leresolver.acme.dnschallenge.provider=ionos
+      - --certificatesresolvers.leresolver.acme.dnschallenge.delaybeforecheck=0
+      - --certificatesresolvers.leresolver.acme.dnschallenge.resolvers=1.1.1.1:53,1.0.0.1:53
+      # - --certificatesresolvers.leresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory # testing
+      - --certificatesresolvers.leresolver.acme.email=${LE_MAIL}
+      - --certificatesresolvers.leresolver.acme.storage=/letsencrypt/acme.json
+      - --certificatesresolvers.leresolver.acme.keytype=RSA4096
+    environment:
+      - IONOS_API_KEY_FILE=/run/secrets/IONOS_API_KEY
+    secrets:
+      - IONOS_API_KEY
+    ports:
+      - "80:80"
+      - "443:443"
+      # - "8080:8080"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(\"traefik.${DOMAIN}\")"
+      - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+      - "traefik.http.routers.traefik.entrypoints=websecure"
+    volumes:
+      - ./containerdata/traefik/letsencrypt:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./containerdata/traefik/rules:/rules
+      - ./containerdata/traefik/traefik.log:/traefik.log
+      - ./containerdata/traefik/shared:/shared
+    networks:
+      proxynet:
+        ipv4_address: 172.18.0.2
+      socketproxynet:
+        ipv4_address: 172.19.0.2
+    dns:
+      - "172.18.0.5"
+  socketproxy:
+    image: 'fluencelabs/docker-socket-proxy'
+    container_name: 'socketproxy'
+    hostname: 'socketproxy'
+    restart: 'unless-stopped'
+    privileged: true
+    ports:
+      - "127.0.0.1:2375:2375"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    environment:
+      - LOG_LEVEL=info # debug,info,notice,warning,err,crit,alert,emerg
+      ## Variables match the URL prefix (i.e. AUTH blocks access to /auth/* parts of the API, etc.).
+      # 0 to revoke access.
+      # 1 to grant access.
+      ## Granted by Default
+      - EVENTS=1
+      - PING=1
+      - VERSION=1
+      ## Revoked by Default
+      # Security critical
+      - AUTH=0
+      - SECRETS=0
+      - POST=0 # Watchtower
+      - DELETE=0 # Watchtower
+        # GET Optons
+      - BUILD=0
+      - COMMIT=0
+      - CONFIGS=0
+      - CONTAINERS=1 # Traefik, portainer, etc.
+      - DISTRIBUTION=0
+      - EXEC=0
+      - IMAGES=1 # Portainer, Watchtower
+      - INFO=1 # Portainer
+      - NETWORKS=1 # Portainer, Watchtower
+      - NODES=0
+      - PLUGINS=0
+      - SERVICES=1 # Portainer
+      - SESSION=0
+      - SWARM=0
+      - SYSTEM=0
+      - TASKS=1 # Portaienr
+      - VOLUMES=1 # Portainer
+      # POST Options
+      - CONTAINERS_CREATE=0 # WatchTower
+      - CONTAINERS_START=0 # WatchTower
+      - CONTAINERS_UPDATE=0 # WatchTower
+      # DELETE Options
+      - CONTAINERS_DELETE=0 # WatchTower
+      - IMAGES_DELETE=0 # WatchTower
+    networks:
+      socketproxynet:
+        ipv4_address: 172.19.0.3
+    dns:
+      - "172.18.0.5"
+  portainer:
+    image: 'portainer/portainer-ce:latest'
+    container_name: 'portainer'
+    hostname: 'portainer'
+    command: '-H tcp://socketproxy:2375'
+    restart: 'unless-stopped'
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock'
+      - './containerdata/portainer:/data'
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer.rule=Host(\"portainer.${DOMAIN}\")"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+      - "traefik.http.routers.portainer.entrypoints=websecure"
+    networks:
+      proxynet:
+        ipv4_address: 172.18.0.4
+      socketproxynet:
+        ipv4_address: 172.19.0.4
+    dns:
+      - "172.18.0.5"
+  pihole:
+    container_name: pihole
+    hostname: 'pihole'
+    image: pihole/pihole:latest
+    restart: unless-stopped
+    secrets:
+      - PIHOLE_WEBPASSWORD
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      # - "67:67/udp"
+      # - "81:80/tcp" # just if cant access the admin portal
+    environment:
+      - TZ=Europe/Berlin
+      - WEBPASSWORD_FILE=/run/secrets/PIHOLE_WEBPASSWORD
+      - ServerIP=$SERVERIP # docker host static ip
+      - PROXY_LOCATION=pihole
+      - VIRTUAL_HOST=https://pihole.${DOMAIN}
+      - DNS1=127.0.0.1
+      - DNS2=1.1.1.1
+      - REV_SERVER=True
+      - REV_SERVER_TARGET=10.17.17.254
+      - REV_SERVER_CIDR=10.17.17.0/24
+    # Volumes store your data between container upgrades
+    volumes:
+      - './containerdata/pihole/etc-pihole/:/etc/pihole/'
+      - './containerdata/pihole/etc-dnsmasq.d/:/etc/dnsmasq.d/'
+    # Recommended but not required (DHCP needs NET_ADMIN)
+    #   https://github.com/pi-hole/docker-pi-hole#note-on-capabilities
+    # cap_add:
+    #   - NET_ADMIN
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pihole.rule=Host(\"pihole.${DOMAIN}\")"
+      - "traefik.http.services.pihole.loadbalancer.server.port=80"
+      - "traefik.http.routers.pihole.entrypoints=websecure"
+    networks:
+      proxynet:
+        ipv4_address: 172.18.0.5
+  bitwarden:
+    image: 'vaultwarden/server:latest'
+    container_name: 'bitwarden'
+    hostname: 'bitwarden'
+    restart: 'unless-stopped'
+    volumes:
+       - './containerdata/bitwarden:/data'
+    secrets:
+      - BITWARDENADMINTOKEN
+      - BITWARDENSMTPUSER
+      - BITWARDENSMTPPASSWORD
+      - BITWARDENSMTPHOST
+    environment:
+      - ADMIN_TOKEN_FILE=/run/secrets/BITWARDENADMINTOKEN
+      - WEBSOCKET_ENABLED=true
+      - SIGNUPS_ALLOWED=false
+      - SMTP_HOST_FILE=/run/secrets/BITWARDENSMTPHOST
+      - SMTP_FROM_FILE=/run/secrets/BITWARDENSMTPUSER
+      - SMTP_PORT=587
+      - SMTP_SSL=True
+      - SMTP_USERNAME_FILE=/run/secrets/BITWARDENSMTPUSER
+      - SMTP_PASSWORD_FILE=/run/secrets/BITWARDENSMTPPASSWORD
+      - DOMAIN=https://bitwarden.${DOMAIN}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.bitwarden.loadbalancer.server.port=80"
+      - "traefik.http.routers.bitwarden.rule=Host(\"bitwarden.${DOMAIN}\")"
+      - "traefik.http.routers.bitwarden.entrypoints=websecure"
+    networks:
+      proxynet:
+        ipv4_address: 172.18.0.6
+    dns:
+      - "172.18.0.5"
+  checkmk:
+    image: 'checkmk/check-mk-free:2.0.0p15'
+    container_name: 'checkmk'
+    hostname: 'checkmk'
+    restart: 'unless-stopped'
+    ports:
+      - "6557:6557"
+    tmpfs:
+      - ./containerdata/checkmk/tmp:uid=1000,gid=1000
+    volumes:
+       - ./containerdata/checkmk:/omd/sites
+       - /etc/localtime:/etc/localtime:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.checkmk.loadbalancer.server.port=5000"
+      - "traefik.http.routers.checkmk.rule=Host(\"checkmk.${DOMAIN}\")"
+      - "traefik.http.routers.checkmk.entrypoints=websecure"
+    networks:
+      proxynet:
+        ipv4_address: 172.18.0.7
+      socketproxynet:
+        ipv4_address: 172.19.0.5
+    dns:
+      - "172.18.0.5"
