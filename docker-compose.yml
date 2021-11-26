@@ -237,7 +237,7 @@ services:
     ports:
       - "6557:6557"
     tmpfs:
-      - ./containerdata/checkmk/tmp:uid=1000,gid=1000
+      - /opt/omd/sites/cmk/tmp:uid=1000,gid=1000
     volumes:
        - ./containerdata/checkmk:/omd/sites
        - /etc/localtime:/etc/localtime:ro
