@@ -12,3 +12,5 @@ FILENAME=$CHECKMK_EDITION-$CHECKMK_VERSION.tar.gz
 sudo mkdir ./images
 sudo wget https://download.checkmk.com/checkmk/2.0.0p15/$FILENAME -O ./images/$FILENAME
 sudo docker load -i ./images/$FILENAME
+echo ""
+echo ""
