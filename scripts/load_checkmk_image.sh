@@ -1,3 +1,4 @@
+#!/bin/bash
 # download CheckMK Enterprise
 # Download: https://checkmk.com/download?edition=cfe&version=stable&dist=docker
 # Guide: https://docs.checkmk.com/latest/en/introduction_docker.html

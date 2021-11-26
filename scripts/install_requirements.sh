@@ -1,3 +1,4 @@
+#!/bin/bash
 # Quelle: https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-20-04#:~:text=How%20To%20Install%20and%20Use%20Docker%20on%20Ubuntu,Working%20with%20Docker%20Images.%20...%20More%20items...%20
 # This is used to install the requirements on debian 11
 # - docker
