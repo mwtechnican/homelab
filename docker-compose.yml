@@ -288,7 +288,7 @@ services:
       - SMTP_SECURE=tls
       - SMTP_PORT=587
       - SMTP_NAME_FILE=/run/secrets/SMTPUSER
-      - SMTP_PASSWORD _FILE=/run/secrets/SMTPPASSWORD
+      - SMTP_PASSWORD_FILE=/run/secrets/SMTPPASSWORD
       - MAIL_FROM_ADDRESS=nextcloud@${DOMAIN}
       - MAIL_DOMAIN=${DOMAIN}
     depends_on:

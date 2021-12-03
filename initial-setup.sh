@@ -12,5 +12,5 @@ echo -e "\e[32mcreate docker network\e[0m"
 bash ./scripts/create_external_networks.sh
 
 echo -e "\e[32msecrets should not be empty\e[0m"
-sudo docker-compose -f docker-compose.yml -p home-lab pull
-sudo docker-compose -f docker-compose.yml -p home-lab up -d
+docker-compose -f docker-compose.yml -p home-lab pull
+docker-compose -f docker-compose.yml -p home-lab up -d
