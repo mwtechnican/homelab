@@ -9,8 +9,8 @@ CHECKMK_VERSION=$2
 
 FILENAME=$CHECKMK_EDITION-$CHECKMK_VERSION.tar.gz
 
-sudo mkdir ./images
-sudo wget https://download.checkmk.com/checkmk/$CHECKMK_VERSION/$FILENAME -O ./images/$FILENAME
-sudo docker load -i ./images/$FILENAME
+mkdir ./images
+wget https://download.checkmk.com/checkmk/$CHECKMK_VERSION/$FILENAME -O ./images/$FILENAME
+docker load -i ./images/$FILENAME
 echo ""
 echo ""

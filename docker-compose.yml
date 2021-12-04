@@ -247,7 +247,7 @@ services:
     dns:
       - "172.18.0.5"
   checkmk:
-    image: 'checkmk/check-mk-free:2.0.0p15'
+    image: 'checkmk/check-mk-free:${CHECKMK_VERSION}'
     container_name: 'checkmk'
     hostname: 'checkmk'
     restart: 'unless-stopped'
@@ -301,9 +301,9 @@ services:
       - NEXTCLOUD_POSTGRES_USER
     labels:
       - "traefik.enable=true"
-      - "traefik.http.services.checkmk.loadbalancer.server.port=80"
-      - "traefik.http.routers.checkmk.rule=Host(\"nextcloud.${DOMAIN}\")"
-      - "traefik.http.routers.checkmk.entrypoints=websecure"
+      - "traefik.http.services.nextcloud-app.loadbalancer.server.port=80"
+      - "traefik.http.routers.nextcloud-app.rule=Host(\"nextcloud.${DOMAIN}\")"
+      - "traefik.http.routers.nextcloud-app.entrypoints=websecure"
     networks:
       proxynet:
         ipv4_address: 172.18.0.8
