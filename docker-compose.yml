@@ -35,12 +35,6 @@ secrets:
     file: ./secrets/NEXTCLOUD_POSTGRES_PASSWORD
   NEXTCLOUD_POSTGRES_USER:
     file: ./secrets/NEXTCLOUD_POSTGRES_USER
-  NEXTCLOUD_SMTPHOST:
-    file: ./secrets/SMTPHOST
-  NEXTCLOUD_SMTPUSER:
-    file: ./secrets/SMTPUSER
-  NEXTCLOUD_SMTPPASSWORD:
-    file: ./secrets/SMTPPASSWORD
   #----------------------------------------------------#
 
 ##################################################################
@@ -266,17 +260,16 @@ services:
     networks:
       proxynet:
         ipv4_address: 172.18.0.7
-      socketproxynet:
-        ipv4_address: 172.19.0.5
     dns:
       - "172.18.0.5"
   nextcloud-app:
-    image: nextcloud:fpm
+    image: nextcloud
     container_name: 'nextcloud-app'
     hostname: 'nextcloud-app'
     restart: 'unless-stopped'
     volumes:
       - ./containerdata/nextcloud-app:/var/www/html
+      - /etc/localtime:/etc/localtime:ro
     environment:
       - POSTGRES_HOST=nextcloud-db
       - POSTGRES_DB_FILE=/run/secrets/NEXTCLOUD_POSTGRES_DB
@@ -284,15 +277,12 @@ services:
       - POSTGRES_PASSWORD_FILE=/run/secrets/NEXTCLOUD_POSTGRES_PASSWORD
       - NEXTCLOUD_ADMIN_PASSWORD_FILE=/run/secrets/NEXTCLOUD_ADMIN_PASSWORD
       - NEXTCLOUD_ADMIN_USER_FILE=/run/secrets/NEXTCLOUD_ADMIN_USER
-      - SMTP_HOST_FILE=/run/secrets/NEXTCLOUD_SMTPHOST
-      - SMTP_SECURE=ssl
-      - SMTP_PORT=465
-      - SMTP_NAME_FILE=/run/secrets/SMTPUSER
-      - SMTP_PASSWORD_FILE=/run/secrets/SMTPPASSWORD
-      - MAIL_FROM_ADDRESS=nextcloud@${DOMAIN}
-      - MAIL_DOMAIN=${DOMAIN}
+      - TRUSTED_PROXIES=172.18.0.2/24
+      - NEXTCLOUD_TRUSTED_DOMAINS=host nextcloud.${DOMAIN}
+      - REDIS_HOST=nextcloud-redis
     depends_on:
       - nextcloud-db
+      - nextcloud-redis
     secrets:
       - NEXTCLOUD_ADMIN_PASSWORD
       - NEXTCLOUD_ADMIN_USER
@@ -307,8 +297,6 @@ services:
     networks:
       proxynet:
         ipv4_address: 172.18.0.8
-      socketproxynet:
-        ipv4_address: 172.19.0.6
     dns:
       - "172.18.0.5"
   nextcloud-db:
@@ -317,7 +305,7 @@ services:
     hostname: 'nextcloud-db'
     restart: 'unless-stopped'
     volumes:
-      - ./containerdata/nextcloud-db:/var/www/html
+      - ./containerdata/nextcloud-db:/var/lib/postgresql/data
     environment:
       - POSTGRES_HOST=db
       - POSTGRES_DB_FILE=/run/secrets/NEXTCLOUD_POSTGRES_DB
@@ -330,7 +318,17 @@ services:
     networks:
       proxynet:
         ipv4_address: 172.18.0.9
-      socketproxynet:
-        ipv4_address: 172.19.0.7
+    dns:
+      - "172.18.0.5"
+  nextcloud-redis:
+    image: redis:latest
+    container_name: nextcloud-redis
+    hostname: nextcloud-redis
+    restart: 'unless-stopped'
+    volumes:
+      - ./containerdata/nextcloud-redis:/var/lib/redis
+    networks:
+      proxynet:
+        ipv4_address: 172.18.0.10
     dns:
       - "172.18.0.5"
