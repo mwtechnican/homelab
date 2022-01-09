@@ -332,3 +332,32 @@ services:
         ipv4_address: 172.18.0.10
     dns:
       - "172.18.0.5"
+  speedtest:
+    image: henrywhitaker3/speedtest-tracker
+    container_name: 'speedtest'
+    hostname: 'speedtest'
+    restart: 'unless-stopped'
+    volumes:
+      - ./containerdata/speedtest:/config
+    environment:
+      - 
+      - TZ=Europe/Berlin
+      - OOKLA_EULA_GDPR=true
+    depends_on:
+      - nextcloud-db
+      - nextcloud-redis
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.speedtest.loadbalancer.server.port=80"
+      - "traefik.http.routers.speedtest.rule=Host(\"speedtest.${DOMAIN}\")"
+      - "traefik.http.routers.speedtest.entrypoints=websecure"
+    networks:
+      proxynet:
+        ipv4_address: 172.18.0.11
+    dns:
+      - "172.18.0.5"
