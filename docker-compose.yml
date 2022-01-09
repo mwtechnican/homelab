@@ -186,7 +186,7 @@ services:
       - ServerIP=$SERVERIP # docker host static ip
       - PROXY_LOCATION=pihole
       - VIRTUAL_HOST=https://pihole.${DOMAIN}
-      - DNS1=127.0.0.1
+      - DNS1=1.0.0.1
       - DNS2=1.1.1.1
       - REV_SERVER=True
       - REV_SERVER_TARGET=10.17.17.254
