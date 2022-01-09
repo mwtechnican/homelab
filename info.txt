@@ -1,2 +1,5 @@
-# speedtest 
+# speedtest troubleshooting
 https://github.com/henrywhitaker3/Speedtest-Tracker/issues/421#issuecomment-989923605
+
+# pihole troubleshooting
+https://github.com/pi-hole/docker-pi-hole/issues/860#issuecomment-922829311
