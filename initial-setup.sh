@@ -4,47 +4,52 @@ echo -e "\e[32mloading variables '.env'\e[0m"
 
 echo -e "\e[32mnow enter the secrets which should be used for the containers\e[0m"
 
-read -p -s "Enter bitwarden_admin_token: " bitwarden_admin_token
+read -s -r -p "Enter bitwarden_admin_token: " bitwarden_admin_token
+echo
 echo $bitwarden_admin_token >> ./secrets/bitwarden_admin_token
 unset bitwarden_admin_token
 
-read -p -s "Enter ionos_api_key: " ionos_api_key
+read -s -r -p "Enter ionos_api_key: " ionos_api_key
+echo
 echo $ionos_api_key >> ./secrets/ionos_api_key
 unset ionos_api_key
 
-read -p "Enter nextcloud_admin_user [admin]: " nextcloud_admin_user
+read -r -p "Enter nextcloud_admin_user [admin]: " nextcloud_admin_user
 nextcloud_admin_user=${nextcloud_admin_user:-admin}
 echo $nextcloud_admin_user >> ./secrets/nextcloud_admin_user
 unset nextcloud_admin_user
 
-read -p -s "Enter nextcloud_admin_password: " nextcloud_admin_password
+read -s -r -p "Enter nextcloud_admin_password: " nextcloud_admin_password
+echo
 echo $nextcloud_admin_password >> ./secrets/nextcloud_admin_password
 unset nextcloud_admin_password
 
-read -p "Enter nextcloud_postgres_db [nextcloud-db]: " nextcloud_postgres_db
+read -r -p "Enter nextcloud_postgres_db [nextcloud-db]: " nextcloud_postgres_db
 nextcloud_postgres_db=${nextcloud_postgres_db:-'nextcloud-db'}
 echo $nextcloud_postgres_db >> ./secrets/nextcloud_postgres_db
 unset nextcloud_postgres_db
 
-read -p "Enter nextcloud_postgres_user [nextcloud]: " nextcloud_postgres_user
+read -r -p "Enter nextcloud_postgres_user [nextcloud]: " nextcloud_postgres_user
 nextcloud_postgres_user=${nextcloud_postgres_user:-'nextcloud'}
 echo $nextcloud_postgres_user >> ./secrets/nextcloud_postgres_user
 unset nextcloud_postgres_user
 
-read -p -s "Enter nextcloud_postgres_password: " nextcloud_postgres_password
+read -s -r -p "Enter nextcloud_postgres_password: " nextcloud_postgres_password
+echo
 echo $nextcloud_postgres_password >> ./secrets/nextcloud_postgres_password
 unset nextcloud_postgres_password
 
-read -p "Enter smtp_host [smtp.ionos.de]: " smtp_host
+read -r -p "Enter smtp_host [smtp.ionos.de]: " smtp_host
 smtp_host=${smtp_host:-smtp.ionos.de}
 echo $smtp_host >> ./secrets/smtp_host
 unset smtp_host
 
-read -p "Enter smtp_user: " smtp_user
+read -r -p "Enter smtp_user: " smtp_user
 echo $smtp_user >> ./secrets/smtp_user
 unset smtp_user
 
-read -p -s "Enter smtp_password: " smtp_password
+read -s -r -p "Enter smtp_password: " smtp_password
+echo
 echo $smtp_password >> ./secrets/smtp_password
 unset smtp_password
 
