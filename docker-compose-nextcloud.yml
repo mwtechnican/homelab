@@ -10,16 +10,16 @@ networks:
 ##################################################################
 secrets:
   #----------------------------------------------------#
-  NEXTCLOUD_ADMIN_PASSWORD:
-      file: ./secrets/NEXTCLOUD_ADMIN_PASSWORD
-  NEXTCLOUD_ADMIN_USER:
-    file: ./secrets/NEXTCLOUD_ADMIN_USER
-  NEXTCLOUD_POSTGRES_DB:
-    file: ./secrets/NEXTCLOUD_POSTGRES_DB
-  NEXTCLOUD_POSTGRES_PASSWORD:
-    file: ./secrets/NEXTCLOUD_POSTGRES_PASSWORD
-  NEXTCLOUD_POSTGRES_USER:
-    file: ./secrets/NEXTCLOUD_POSTGRES_USER
+  nextcloud_admin_password:
+      file: ./secrets/nextcloud_admin_password
+  nextcloud_admin_user:
+    file: ./secrets/nextcloud_admin_user
+  nextcloud_postgres_db:
+    file: ./secrets/nextcloud_postgres_db
+  nextcloud_postgres_password:
+    file: ./secrets/nextcloud_postgres_password
+  nextcloud_postgres_user:
+    file: ./secrets/nextcloud_postgres_user
   #----------------------------------------------------#
 
 ##################################################################
@@ -34,11 +34,11 @@ services:
       - /etc/localtime:/etc/localtime:ro
     environment:
       - POSTGRES_HOST=nextcloud-db
-      - POSTGRES_DB_FILE=/run/secrets/NEXTCLOUD_POSTGRES_DB
-      - POSTGRES_USER_FILE=/run/secrets/NEXTCLOUD_POSTGRES_USER
-      - POSTGRES_PASSWORD_FILE=/run/secrets/NEXTCLOUD_POSTGRES_PASSWORD
-      - NEXTCLOUD_ADMIN_PASSWORD_FILE=/run/secrets/NEXTCLOUD_ADMIN_PASSWORD
-      - NEXTCLOUD_ADMIN_USER_FILE=/run/secrets/NEXTCLOUD_ADMIN_USER
+      - POSTGRES_DB_FILE=/run/secrets/nextcloud_postgres_db
+      - POSTGRES_USER_FILE=/run/secrets/nextcloud_postgres_user
+      - POSTGRES_PASSWORD_FILE=/run/secrets/nextcloud_postgres_password
+      - NEXTCLOUD_ADMIN_PASSWORD_FILE=/run/secrets/nextcloud_admin_password
+      - NEXTCLOUD_ADMIN_USER_FILE=/run/secrets/nextcloud_admin_user
       - TRUSTED_PROXIES=172.18.0.2/24
       - NEXTCLOUD_TRUSTED_DOMAINS=host nextcloud.${DOMAIN}
       - REDIS_HOST=nextcloud-redis
@@ -46,11 +46,11 @@ services:
       - nextcloud-db
       - nextcloud-redis
     secrets:
-      - NEXTCLOUD_ADMIN_PASSWORD
-      - NEXTCLOUD_ADMIN_USER
-      - NEXTCLOUD_POSTGRES_DB
-      - NEXTCLOUD_POSTGRES_PASSWORD
-      - NEXTCLOUD_POSTGRES_USER
+      - nextcloud_admin_password
+      - nextcloud_admin_user
+      - nextcloud_postgres_db
+      - nextcloud_postgres_password
+      - nextcloud_postgres_user
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.nextcloud-app.loadbalancer.server.port=80"
@@ -68,13 +68,13 @@ services:
       - ./containerdata/nextcloud-db:/var/lib/postgresql/data
     environment:
       - POSTGRES_HOST=db
-      - POSTGRES_DB_FILE=/run/secrets/NEXTCLOUD_POSTGRES_DB
-      - POSTGRES_USER_FILE=/run/secrets/NEXTCLOUD_POSTGRES_USER
-      - POSTGRES_PASSWORD_FILE=/run/secrets/NEXTCLOUD_POSTGRES_PASSWORD
+      - POSTGRES_DB_FILE=/run/secrets/nextcloud_postgres_db
+      - POSTGRES_USER_FILE=/run/secrets/nextcloud_postgres_user
+      - POSTGRES_PASSWORD_FILE=/run/secrets/nextcloud_postgres_password
     secrets:
-      - NEXTCLOUD_POSTGRES_DB
-      - NEXTCLOUD_POSTGRES_PASSWORD
-      - NEXTCLOUD_POSTGRES_USER
+      - nextcloud_postgres_db
+      - nextcloud_postgres_password
+      - nextcloud_postgres_user
     networks:
       nextcloudnet:
   nextcloud-redis:

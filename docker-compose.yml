@@ -7,28 +7,18 @@ networks:
 
 ##################################################################
 secrets:
-  IONOS_API_KEY:
-    file: ./secrets/IONOS_API_KEY
   #----------------------------------------------------#
-  BITWARDENADMINTOKEN:
-    file: ./secrets/BITWARDENADMINTOKEN
-  BITWARDENSMTPHOST:
-    file: ./secrets/SMTPHOST
-  BITWARDENSMTPUSER:
-    file: ./secrets/SMTPUSER
-  BITWARDENSMTPPASSWORD:
-    file: ./secrets/SMTPPASSWORD
+  ionos_api_key:
+    file: ./secrets/ionos_api_key
   #----------------------------------------------------#
-  NEXTCLOUD_ADMIN_PASSWORD:
-      file: ./secrets/NEXTCLOUD_ADMIN_PASSWORD
-  NEXTCLOUD_ADMIN_USER:
-    file: ./secrets/NEXTCLOUD_ADMIN_USER
-  NEXTCLOUD_POSTGRES_DB:
-    file: ./secrets/NEXTCLOUD_POSTGRES_DB
-  NEXTCLOUD_POSTGRES_PASSWORD:
-    file: ./secrets/NEXTCLOUD_POSTGRES_PASSWORD
-  NEXTCLOUD_POSTGRES_USER:
-    file: ./secrets/NEXTCLOUD_POSTGRES_USER
+  bitwarden_admin_token:
+    file: ./secrets/bitwarden_admin_token
+  bitwarden_smtp_host:
+    file: ./secrets/smtp_host
+  bitwarden_smtp_user:
+    file: ./secrets/smtp_user
+  bitwarden_smtp_password:
+    file: ./secrets/smtp_password
   #----------------------------------------------------#
 
 ##################################################################
@@ -60,9 +50,9 @@ services:
       - --certificatesresolvers.leresolver.acme.storage=/letsencrypt/acme.json
       - --certificatesresolvers.leresolver.acme.keytype=RSA4096
     environment:
-      - IONOS_API_KEY_FILE=/run/secrets/IONOS_API_KEY
+      - IONOS_API_KEY_FILE=/run/secrets/ionos_api_key
     secrets:
-      - IONOS_API_KEY
+      - ionos_api_key
     ports:
       - "80:80"
       - "443:443"
@@ -102,20 +92,20 @@ services:
     volumes:
        - './data/bitwarden:/data'
     secrets:
-      - BITWARDENADMINTOKEN
-      - BITWARDENSMTPUSER
-      - BITWARDENSMTPPASSWORD
-      - BITWARDENSMTPHOST
+      - bitwarden_admin_token
+      - bitwarden_smtp_user
+      - bitwarden_smtp_password
+      - bitwarden_smtp_host
     environment:
-      - ADMIN_TOKEN_FILE=/run/secrets/BITWARDENADMINTOKEN
+      - ADMIN_TOKEN_FILE=/run/secrets/bitwarden_admin_token
       - WEBSOCKET_ENABLED=true
       - SIGNUPS_ALLOWED=false
-      - SMTP_HOST_FILE=/run/secrets/BITWARDENSMTPHOST
-      - SMTP_FROM_FILE=/run/secrets/BITWARDENSMTPUSER
+      - SMTP_HOST_FILE=/run/secrets/bitwarden_smtp_host
+      - SMTP_FROM_FILE=/run/secrets/bitwarden_smtp_user
       - SMTP_PORT=587
       - SMTP_SSL=True
-      - SMTP_USERNAME_FILE=/run/secrets/BITWARDENSMTPUSER
-      - SMTP_PASSWORD_FILE=/run/secrets/BITWARDENSMTPPASSWORD
+      - SMTP_USERNAME_FILE=/run/secrets/bitwarden_smtp_user
+      - SMTP_PASSWORD_FILE=/run/secrets/bitwarden_smtp_password
       - DOMAIN=https://bitwarden.${DOMAIN}
     labels:
       - "traefik.enable=true"
