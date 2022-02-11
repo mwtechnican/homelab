@@ -4,6 +4,8 @@ networks:
   proxynet:
     name: proxynet
     external: true
+  nextcloudnet:
+    name: nextcloudnet
 
 ##################################################################
 secrets:
@@ -56,6 +58,7 @@ services:
       - "traefik.http.routers.nextcloud-app.entrypoints=websecure"
     networks:
       proxynet:
+      nextcloudnet:
   nextcloud-db:
     image: postgres
     container_name: 'nextcloud-db'
@@ -73,7 +76,7 @@ services:
       - NEXTCLOUD_POSTGRES_PASSWORD
       - NEXTCLOUD_POSTGRES_USER
     networks:
-      proxynet:
+      nextcloudnet:
   nextcloud-redis:
     image: redis:latest
     container_name: nextcloud-redis
@@ -82,4 +85,4 @@ services:
     volumes:
       - ./containerdata/nextcloud-redis:/var/lib/redis
     networks:
-      proxynet:
+      nextcloudnet:

@@ -4,9 +4,6 @@ networks:
   proxynet:
     name: proxynet
     external: true
-  socketproxynet:
-    name: socketproxynet
-    external: true
 
 ##################################################################
 secrets:
