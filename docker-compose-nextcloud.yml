@@ -1,0 +1,85 @@
+version: "3.9"
+##################################################################
+networks:
+  proxynet:
+    name: proxynet
+    external: true
+
+##################################################################
+secrets:
+  #----------------------------------------------------#
+  NEXTCLOUD_ADMIN_PASSWORD:
+      file: ./secrets/NEXTCLOUD_ADMIN_PASSWORD
+  NEXTCLOUD_ADMIN_USER:
+    file: ./secrets/NEXTCLOUD_ADMIN_USER
+  NEXTCLOUD_POSTGRES_DB:
+    file: ./secrets/NEXTCLOUD_POSTGRES_DB
+  NEXTCLOUD_POSTGRES_PASSWORD:
+    file: ./secrets/NEXTCLOUD_POSTGRES_PASSWORD
+  NEXTCLOUD_POSTGRES_USER:
+    file: ./secrets/NEXTCLOUD_POSTGRES_USER
+  #----------------------------------------------------#
+
+##################################################################
+services:
+  nextcloud-app:
+    image: nextcloud
+    container_name: 'nextcloud-app'
+    hostname: 'nextcloud-app'
+    restart: 'unless-stopped'
+    volumes:
+      - ./containerdata/nextcloud-app:/var/www/html
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - POSTGRES_HOST=nextcloud-db
+      - POSTGRES_DB_FILE=/run/secrets/NEXTCLOUD_POSTGRES_DB
+      - POSTGRES_USER_FILE=/run/secrets/NEXTCLOUD_POSTGRES_USER
+      - POSTGRES_PASSWORD_FILE=/run/secrets/NEXTCLOUD_POSTGRES_PASSWORD
+      - NEXTCLOUD_ADMIN_PASSWORD_FILE=/run/secrets/NEXTCLOUD_ADMIN_PASSWORD
+      - NEXTCLOUD_ADMIN_USER_FILE=/run/secrets/NEXTCLOUD_ADMIN_USER
+      - TRUSTED_PROXIES=172.18.0.2/24
+      - NEXTCLOUD_TRUSTED_DOMAINS=host nextcloud.${DOMAIN}
+      - REDIS_HOST=nextcloud-redis
+    depends_on:
+      - nextcloud-db
+      - nextcloud-redis
+    secrets:
+      - NEXTCLOUD_ADMIN_PASSWORD
+      - NEXTCLOUD_ADMIN_USER
+      - NEXTCLOUD_POSTGRES_DB
+      - NEXTCLOUD_POSTGRES_PASSWORD
+      - NEXTCLOUD_POSTGRES_USER
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.nextcloud-app.loadbalancer.server.port=80"
+      - "traefik.http.routers.nextcloud-app.rule=Host(\"nextcloud.${DOMAIN}\")"
+      - "traefik.http.routers.nextcloud-app.entrypoints=websecure"
+    networks:
+      proxynet:
+  nextcloud-db:
+    image: postgres
+    container_name: 'nextcloud-db'
+    hostname: 'nextcloud-db'
+    restart: 'unless-stopped'
+    volumes:
+      - ./containerdata/nextcloud-db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_DB_FILE=/run/secrets/NEXTCLOUD_POSTGRES_DB
+      - POSTGRES_USER_FILE=/run/secrets/NEXTCLOUD_POSTGRES_USER
+      - POSTGRES_PASSWORD_FILE=/run/secrets/NEXTCLOUD_POSTGRES_PASSWORD
+    secrets:
+      - NEXTCLOUD_POSTGRES_DB
+      - NEXTCLOUD_POSTGRES_PASSWORD
+      - NEXTCLOUD_POSTGRES_USER
+    networks:
+      proxynet:
+  nextcloud-redis:
+    image: redis:latest
+    container_name: nextcloud-redis
+    hostname: nextcloud-redis
+    restart: 'unless-stopped'
+    volumes:
+      - ./containerdata/nextcloud-redis:/var/lib/redis
+    networks:
+      proxynet:

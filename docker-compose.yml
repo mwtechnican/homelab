@@ -62,7 +62,6 @@ services:
       - --certificatesresolvers.leresolver.acme.dnschallenge.provider=ionos
       - --certificatesresolvers.leresolver.acme.dnschallenge.delaybeforecheck=0
       - --certificatesresolvers.leresolver.acme.dnschallenge.resolvers=1.1.1.1:53,1.0.0.1:53
-      # - --certificatesresolvers.leresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory # testing
       - --certificatesresolvers.leresolver.acme.email=${LE_MAIL}
       - --certificatesresolvers.leresolver.acme.storage=/letsencrypt/acme.json
       - --certificatesresolvers.leresolver.acme.keytype=RSA4096
@@ -73,89 +72,27 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      # - "8080:8080"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.traefik.rule=Host(\"traefik.${DOMAIN}\")"
       - "traefik.http.services.traefik.loadbalancer.server.port=8080"
       - "traefik.http.routers.traefik.entrypoints=websecure"
     volumes:
-      - ./containerdata/traefik/letsencrypt:/letsencrypt
+      - ./data/traefik/letsencrypt:/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./containerdata/traefik/rules:/rules
-      - ./containerdata/traefik/traefik.log:/traefik.log
-      - ./containerdata/traefik/shared:/shared
+      - ./data/traefik/rules:/rules
+      - ./data/traefik/traefik.log:/traefik.log
+      - ./data/traefik/shared:/shared
     networks:
       proxynet:
-        ipv4_address: 172.18.0.2
-      socketproxynet:
-        ipv4_address: 172.19.0.2
-    dns:
-      - "172.18.0.5"
-  # socketproxy:
-  #   image: 'fluencelabs/docker-socket-proxy'
-  #   container_name: 'socketproxy'
-  #   hostname: 'socketproxy'
-  #   restart: 'unless-stopped'
-  #   privileged: true
-  #   ports:
-  #     - "127.0.0.1:2375:2375"
-  #   volumes:
-  #     - "/var/run/docker.sock:/var/run/docker.sock"
-  #   environment:
-  #     - LOG_LEVEL=info # debug,info,notice,warning,err,crit,alert,emerg
-  #     ## Variables match the URL prefix (i.e. AUTH blocks access to /auth/* parts of the API, etc.).
-  #     # 0 to revoke access.
-  #     # 1 to grant access.
-  #     ## Granted by Default
-  #     - EVENTS=1
-  #     - PING=1
-  #     - VERSION=1
-  #     ## Revoked by Default
-  #     # Security critical
-  #     - AUTH=0
-  #     - SECRETS=0
-  #     - POST=0 # Watchtower
-  #     - DELETE=0 # Watchtower
-  #       # GET Optons
-  #     - BUILD=0
-  #     - COMMIT=0
-  #     - CONFIGS=0
-  #     - CONTAINERS=1 # Traefik, portainer, etc.
-  #     - DISTRIBUTION=0
-  #     - EXEC=0
-  #     - IMAGES=1 # Portainer, Watchtower
-  #     - INFO=1 # Portainer
-  #     - NETWORKS=1 # Portainer, Watchtower
-  #     - NODES=0
-  #     - PLUGINS=0
-  #     - SERVICES=1 # Portainer
-  #     - SESSION=0
-  #     - SWARM=0
-  #     - SYSTEM=0
-  #     - TASKS=1 # Portaienr
-  #     - VOLUMES=1 # Portainer
-  #     # POST Options
-  #     - CONTAINERS_CREATE=0 # WatchTower
-  #     - CONTAINERS_START=0 # WatchTower
-  #     - CONTAINERS_UPDATE=0 # WatchTower
-  #     # DELETE Options
-  #     - CONTAINERS_DELETE=0 # WatchTower
-  #     - IMAGES_DELETE=0 # WatchTower
-  #   networks:
-  #     socketproxynet:
-  #       ipv4_address: 172.19.0.3
-  #   dns:
-  #     - "172.18.0.5"
   portainer:
     image: 'portainer/portainer-ce:latest'
     container_name: 'portainer'
     hostname: 'portainer'
-    # command: '-H tcp://socketproxy:2375'
     restart: 'unless-stopped'
     volumes:
       - '/var/run/docker.sock:/var/run/docker.sock'
-      - './containerdata/portainer:/data'
+      - './data/portainer:/data'
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.portainer.rule=Host(\"portainer.${DOMAIN}\")"
@@ -163,57 +100,13 @@ services:
       - "traefik.http.routers.portainer.entrypoints=websecure"
     networks:
       proxynet:
-        ipv4_address: 172.18.0.4
-      socketproxynet:
-        ipv4_address: 172.19.0.4
-    dns:
-      - "172.18.0.5"
-  pihole:
-    container_name: pihole
-    hostname: 'pihole'
-    image: pihole/pihole:latest
-    restart: unless-stopped
-    secrets:
-      - PIHOLE_WEBPASSWORD
-    ports:
-      - "53:53/tcp"
-      - "53:53/udp"
-      # - "67:67/udp"
-      # - "81:80/tcp" # just if cant access the admin portal
-    environment:
-      - TZ=Europe/Berlin
-      - WEBPASSWORD_FILE=/run/secrets/PIHOLE_WEBPASSWORD
-      - ServerIP=$SERVERIP # docker host static ip
-      - PROXY_LOCATION=pihole
-      - VIRTUAL_HOST=https://pihole.${DOMAIN}
-      - DNS1=1.0.0.1
-      - DNS2=1.1.1.1
-      - REV_SERVER=True
-      - REV_SERVER_TARGET=10.17.17.254
-      - REV_SERVER_CIDR=10.17.17.0/24
-    # Volumes store your data between container upgrades
-    volumes:
-      - './containerdata/pihole/etc-pihole/:/etc/pihole/'
-      - './containerdata/pihole/etc-dnsmasq.d/:/etc/dnsmasq.d/'
-    # Recommended but not required (DHCP needs NET_ADMIN)
-    #   https://github.com/pi-hole/docker-pi-hole#note-on-capabilities
-    # cap_add:
-    #   - NET_ADMIN
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.pihole.rule=Host(\"pihole.${DOMAIN}\")"
-      - "traefik.http.services.pihole.loadbalancer.server.port=80"
-      - "traefik.http.routers.pihole.entrypoints=websecure"
-    networks:
-      proxynet:
-        ipv4_address: 172.18.0.5
   bitwarden:
     image: 'vaultwarden/server:latest'
     container_name: 'bitwarden'
     hostname: 'bitwarden'
     restart: 'unless-stopped'
     volumes:
-       - './containerdata/bitwarden:/data'
+       - './data/bitwarden:/data'
     secrets:
       - BITWARDENADMINTOKEN
       - BITWARDENSMTPUSER
@@ -237,11 +130,8 @@ services:
       - "traefik.http.routers.bitwarden.entrypoints=websecure"
     networks:
       proxynet:
-        ipv4_address: 172.18.0.6
-    dns:
-      - "172.18.0.5"
   checkmk:
-    image: 'checkmk/check-mk-free:${CHECKMK_VERSION}'
+    image: 'checkmk/check-mk-raw:2.0.0-latest'
     container_name: 'checkmk'
     hostname: 'checkmk'
     restart: 'unless-stopped'
@@ -250,7 +140,7 @@ services:
     tmpfs:
       - /opt/omd/sites/cmk/tmp:uid=1000,gid=1000
     volumes:
-       - ./containerdata/checkmk:/omd/sites
+       - ./data/checkmk:/omd/sites
        - /etc/localtime:/etc/localtime:ro
     labels:
       - "traefik.enable=true"
@@ -259,86 +149,13 @@ services:
       - "traefik.http.routers.checkmk.entrypoints=websecure"
     networks:
       proxynet:
-        ipv4_address: 172.18.0.7
-    dns:
-      - "172.18.0.5"
-  # nextcloud-app:
-  #   image: nextcloud
-  #   container_name: 'nextcloud-app'
-  #   hostname: 'nextcloud-app'
-  #   restart: 'unless-stopped'
-  #   volumes:
-  #     - ./containerdata/nextcloud-app:/var/www/html
-  #     - /etc/localtime:/etc/localtime:ro
-  #   environment:
-  #     - POSTGRES_HOST=nextcloud-db
-  #     - POSTGRES_DB_FILE=/run/secrets/NEXTCLOUD_POSTGRES_DB
-  #     - POSTGRES_USER_FILE=/run/secrets/NEXTCLOUD_POSTGRES_USER
-  #     - POSTGRES_PASSWORD_FILE=/run/secrets/NEXTCLOUD_POSTGRES_PASSWORD
-  #     - NEXTCLOUD_ADMIN_PASSWORD_FILE=/run/secrets/NEXTCLOUD_ADMIN_PASSWORD
-  #     - NEXTCLOUD_ADMIN_USER_FILE=/run/secrets/NEXTCLOUD_ADMIN_USER
-  #     - TRUSTED_PROXIES=172.18.0.2/24
-  #     - NEXTCLOUD_TRUSTED_DOMAINS=host nextcloud.${DOMAIN}
-  #     - REDIS_HOST=nextcloud-redis
-  #   depends_on:
-  #     - nextcloud-db
-  #     - nextcloud-redis
-  #   secrets:
-  #     - NEXTCLOUD_ADMIN_PASSWORD
-  #     - NEXTCLOUD_ADMIN_USER
-  #     - NEXTCLOUD_POSTGRES_DB
-  #     - NEXTCLOUD_POSTGRES_PASSWORD
-  #     - NEXTCLOUD_POSTGRES_USER
-  #   labels:
-  #     - "traefik.enable=true"
-  #     - "traefik.http.services.nextcloud-app.loadbalancer.server.port=80"
-  #     - "traefik.http.routers.nextcloud-app.rule=Host(\"nextcloud.${DOMAIN}\")"
-  #     - "traefik.http.routers.nextcloud-app.entrypoints=websecure"
-  #   networks:
-  #     proxynet:
-  #       ipv4_address: 172.18.0.8
-  #   dns:
-  #     - "172.18.0.5"
-  # nextcloud-db:
-  #   image: postgres
-  #   container_name: 'nextcloud-db'
-  #   hostname: 'nextcloud-db'
-  #   restart: 'unless-stopped'
-  #   volumes:
-  #     - ./containerdata/nextcloud-db:/var/lib/postgresql/data
-  #   environment:
-  #     - POSTGRES_HOST=db
-  #     - POSTGRES_DB_FILE=/run/secrets/NEXTCLOUD_POSTGRES_DB
-  #     - POSTGRES_USER_FILE=/run/secrets/NEXTCLOUD_POSTGRES_USER
-  #     - POSTGRES_PASSWORD_FILE=/run/secrets/NEXTCLOUD_POSTGRES_PASSWORD
-  #   secrets:
-  #     - NEXTCLOUD_POSTGRES_DB
-  #     - NEXTCLOUD_POSTGRES_PASSWORD
-  #     - NEXTCLOUD_POSTGRES_USER
-  #   networks:
-  #     proxynet:
-  #       ipv4_address: 172.18.0.9
-  #   dns:
-  #     - "172.18.0.5"
-  # nextcloud-redis:
-  #   image: redis:latest
-  #   container_name: nextcloud-redis
-  #   hostname: nextcloud-redis
-  #   restart: 'unless-stopped'
-  #   volumes:
-  #     - ./containerdata/nextcloud-redis:/var/lib/redis
-  #   networks:
-  #     proxynet:
-  #       ipv4_address: 172.18.0.10
-  #   dns:
-  #     - "172.18.0.5"
   speedtest:
     image: henrywhitaker3/speedtest-tracker
     container_name: 'speedtest'
     hostname: 'speedtest'
     restart: 'unless-stopped'
     volumes:
-      - ./containerdata/speedtest:/config
+      - ./data/speedtest:/config
     environment:
       - TZ=Europe/Berlin
       - OOKLA_EULA_GDPR=true
@@ -354,6 +171,3 @@ services:
       - "traefik.http.routers.speedtest.entrypoints=websecure"
     networks:
       proxynet:
-        ipv4_address: 172.18.0.11
-    dns:
-      - "172.18.0.5"
