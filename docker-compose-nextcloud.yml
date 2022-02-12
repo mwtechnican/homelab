@@ -1,11 +1,9 @@
 version: "3.9"
 ##################################################################
 networks:
-  proxynet:
-    name: proxynet
+  dockernet:
+    name: dockernet
     external: true
-  nextcloudnet:
-    name: nextcloudnet
 
 ##################################################################
 secrets:
@@ -57,9 +55,8 @@ services:
       - "traefik.http.routers.nextcloud-app.rule=Host(\"nextcloud.${DOMAIN}\")"
       - "traefik.http.routers.nextcloud-app.entrypoints=websecure"
     networks:
-      proxynet:
+      dockernet:
         ipv4_address: 172.18.0.7
-      nextcloudnet:
   nextcloud-db:
     image: postgres
     container_name: 'nextcloud-db'
@@ -77,7 +74,8 @@ services:
       - nextcloud_postgres_password
       - nextcloud_postgres_user
     networks:
-      nextcloudnet:
+      dockernet:
+        ipv4_address: 172.18.0.8
   nextcloud-redis:
     image: redis:latest
     container_name: nextcloud-redis
@@ -86,4 +84,5 @@ services:
     volumes:
       - ./containerdata/nextcloud-redis:/var/lib/redis
     networks:
-      nextcloudnet:
+      dockernet:
+        ipv4_address: 172.18.0.9

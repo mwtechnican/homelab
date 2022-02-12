@@ -1,8 +1,8 @@
 version: "3.9"
 ##################################################################
 networks:
-  proxynet:
-    name: proxynet
+  dockernet:
+    name: dockernet
     external: true
 
 ##################################################################
@@ -68,7 +68,7 @@ services:
       - ./data/traefik/traefik.log:/traefik.log
       - ./data/traefik/shared:/shared
     networks:
-      proxynet:
+      dockernet:
         ipv4_address: 172.18.0.2
   portainer:
     image: 'portainer/portainer-ce:latest'
@@ -84,7 +84,7 @@ services:
       - "traefik.http.services.portainer.loadbalancer.server.port=9000"
       - "traefik.http.routers.portainer.entrypoints=websecure"
     networks:
-      proxynet:
+      dockernet:
         ipv4_address: 172.18.0.3
   bitwarden:
     image: 'vaultwarden/server:latest'
@@ -115,7 +115,7 @@ services:
       - "traefik.http.routers.bitwarden.rule=Host(\"bitwarden.${DOMAIN}\")"
       - "traefik.http.routers.bitwarden.entrypoints=websecure"
     networks:
-      proxynet:
+      dockernet:
         ipv4_address: 172.18.0.4
   checkmk:
     image: 'checkmk/check-mk-raw:2.0.0-latest'
@@ -135,7 +135,7 @@ services:
       - "traefik.http.routers.checkmk.rule=Host(\"checkmk.${DOMAIN}\")"
       - "traefik.http.routers.checkmk.entrypoints=websecure"
     networks:
-      proxynet:
+      dockernet:
         ipv4_address: 172.18.0.5
   speedtest:
     image: henrywhitaker3/speedtest-tracker
@@ -158,5 +158,5 @@ services:
       - "traefik.http.routers.speedtest.rule=Host(\"speedtest.${DOMAIN}\")"
       - "traefik.http.routers.speedtest.entrypoints=websecure"
     networks:
-      proxynet:
+      dockernet:
         ipv4_address: 172.18.0.6
