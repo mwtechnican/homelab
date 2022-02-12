@@ -1,2 +1,0 @@
-# speedtest troubleshooting
-https://github.com/henrywhitaker3/Speedtest-Tracker/issues/421#issuecomment-989923605
