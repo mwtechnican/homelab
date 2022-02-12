@@ -1,8 +1,14 @@
 #!/bin/bash
-echo -e "\e[32mupdating containers used in stack 'home-lab' and 'home-nextcloud'\e[0m"
+echo -e "loading variables '.env'"
+. .env
+
+echo -e "updating containers used in stack 'home-lab'"
 docker-compose -f docker-compose.yml -p home-lab pull
 docker-compose -f docker-compose.yml -p home-lab up -d
-docker-compose -f docker-compose-nextcloud.yml -p home-nextcloud pull
-docker-compose -f docker-compose-nextcloud.yml -p home-nextcloud up -d
+if [ $install_nextcloud = 'true' ]; then
+    echo -e "updating containers used in stack 'home-nextcloud'"
+    docker-compose -f docker-compose-nextcloud.yml -p home-nextcloud pull
+    docker-compose -f docker-compose-nextcloud.yml -p home-nextcloud up -d
+fi
 docker image prune -f
 echo ""
