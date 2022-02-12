@@ -12,12 +12,11 @@ echo "SERVERIP=$SERVERIP" >> .env
 read -r -p "install nextcloud containers? [false]: " install_nextcloud
 install_nextcloud=${install_nextcloud:-false}
 echo "install_nextcloud=$install_nextcloud" >> .env
-
-echo -e "loading variables '.env'"
+echo ""
+# echo -e "loading variables '.env'"
 . .env
 
 echo -e "now enter the secrets which should be used for the containers"
-
 read -s -r -p "Enter bitwarden_admin_token: " bitwarden_admin_token
 echo
 echo $bitwarden_admin_token >> ./secrets/bitwarden_admin_token
@@ -69,7 +68,6 @@ echo
 echo $smtp_password >> ./secrets/smtp_password
 unset smtp_password
 
-echo ""
 echo ""
 
 ####################################################################################
