@@ -58,6 +58,7 @@ services:
       - "traefik.http.routers.nextcloud-app.entrypoints=websecure"
     networks:
       proxynet:
+        ipv4_address: 172.18.0.7
       nextcloudnet:
   nextcloud-db:
     image: postgres

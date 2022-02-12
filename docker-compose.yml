@@ -85,6 +85,7 @@ services:
       - "traefik.http.routers.portainer.entrypoints=websecure"
     networks:
       proxynet:
+        ipv4_address: 172.18.0.3
   bitwarden:
     image: 'vaultwarden/server:latest'
     container_name: 'bitwarden'
@@ -115,6 +116,7 @@ services:
       - "traefik.http.routers.bitwarden.entrypoints=websecure"
     networks:
       proxynet:
+        ipv4_address: 172.18.0.4
   checkmk:
     image: 'checkmk/check-mk-raw:2.0.0-latest'
     container_name: 'checkmk'
@@ -134,6 +136,7 @@ services:
       - "traefik.http.routers.checkmk.entrypoints=websecure"
     networks:
       proxynet:
+        ipv4_address: 172.18.0.5
   speedtest:
     image: henrywhitaker3/speedtest-tracker
     container_name: 'speedtest'
@@ -156,3 +159,4 @@ services:
       - "traefik.http.routers.speedtest.entrypoints=websecure"
     networks:
       proxynet:
+        ipv4_address: 172.18.0.6
