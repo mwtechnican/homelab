@@ -69,6 +69,7 @@ services:
       - ./data/traefik/shared:/shared
     networks:
       proxynet:
+        ipv4_address: 172.18.0.2
   portainer:
     image: 'portainer/portainer-ce:latest'
     container_name: 'portainer'

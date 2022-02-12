@@ -53,6 +53,9 @@ echo
 echo $smtp_password >> ./secrets/smtp_password
 unset smtp_password
 
+echo ""
+echo ""
+
 ####################################################################################
 
 echo -e "\e[32minstall docker and docker-compose\e[0m"
