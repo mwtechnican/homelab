@@ -1,11 +1,14 @@
 #!/bin/bash
-echo -e "loading variables '.env'"
+blue=`tput setaf 4` # use color
+reset=`tput sgr0`
+
+echo -e "${blue}loading variables '.env'${reset}"
 . .env
 
-echo -e "stopping containers used in stack 'home-lab'"
+echo -e "${blue}stopping containers used in stack 'home-lab'${reset}"
 docker-compose -f docker-compose.yml -p home-lab down
 if [ $install_nextcloud = 'true' ]; then
-    echo -e "stopping containers used in stack 'home-nextcloud'"
+    echo -e "${blue}stopping containers used in stack 'home-nextcloud'${reset}"
     docker-compose -f docker-compose.yml -p home-lab down
 fi
 echo ""
