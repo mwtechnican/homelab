@@ -5,9 +5,13 @@
 # example link  : https://download.checkmk.com/checkmk/2.0.0p19/check-mk-free-docker-2.0.0p19.tar.gz
 ##################################################################
 
-checkmk_edition = $1
-checkmk_version = $2
+checkmk_edition=$1
+checkmk_version=$2
 
-echo "downloading checkmk image - ${checkmk_edition}-${checkmk_version}"
-sudo wget https://download.checkmk.com/checkmk/${checkmk_version}/${checkmk_edition}-${checkmk_version}.tar.gz -O ./images/${checkmk_edition}-${checkmk_version}.tar.gz
-sudo docker load -i ./images/${checkmk_edition}-${checkmk_version}.tar.gz
+mkdir -p ./images
+
+if test -z "$(docker images -q checkmk/$(echo "${checkmk_edition%-docker}"):${checkmk_version})"; then
+    echo "downloading checkmk image - ${checkmk_edition}-${checkmk_version}"
+    wget https://download.checkmk.com/checkmk/${checkmk_version}/${checkmk_edition}-${checkmk_version}.tar.gz -O ./images/${checkmk_edition}-${checkmk_version}.tar.gz
+    docker load -i ./images/${checkmk_edition}-${checkmk_version}.tar.gz
+fi
