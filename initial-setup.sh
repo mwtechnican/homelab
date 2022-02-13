@@ -5,7 +5,7 @@ if [ $ENVFILESPECIFIED = 'true' ]; then
     echo -e "loading variables '.env'"
     . .env
 
-    echo -e "secrets in folder secrets defined and secured [true]?: " SECRETSDEFINED
+    read -r -p "secrets in folder secrets defined and secured [true]?: " SECRETSDEFINED
     SECRETSDEFINED=${SECRETSDEFINED:-true}
     if [ $SECRETSDEFINED = 'true' ]; then
         echo "install docker and docker-compose"
@@ -15,6 +15,7 @@ if [ $ENVFILESPECIFIED = 'true' ]; then
         bash ./scripts/create_external_networks.sh
 
         echo "downloading container images"
+        bash scripts/get_checkmk_image.sh $checkmk_edition $checkmk_version
         docker-compose -f docker-compose.yml -p home-lab pull
 
         echo "creating container"
