@@ -38,7 +38,7 @@ services:
       - NEXTCLOUD_ADMIN_PASSWORD_FILE=/run/secrets/nextcloud_admin_password
       - NEXTCLOUD_ADMIN_USER_FILE=/run/secrets/nextcloud_admin_user
       - TRUSTED_PROXIES=172.18.0.2/24
-      - NEXTCLOUD_TRUSTED_DOMAINS=host nextcloud.${DOMAIN}
+      - NEXTCLOUD_TRUSTED_DOMAINS=host nextcloud.${domain}
       - REDIS_HOST=nextcloud-redis
     depends_on:
       - nextcloud-db
@@ -52,7 +52,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.nextcloud-app.loadbalancer.server.port=80"
-      - "traefik.http.routers.nextcloud-app.rule=Host(\"nextcloud.${DOMAIN}\")"
+      - "traefik.http.routers.nextcloud-app.rule=Host(\"nextcloud.${domain}\")"
       - "traefik.http.routers.nextcloud-app.entrypoints=websecure"
     networks:
       dockernet:

@@ -41,12 +41,12 @@ services:
       - --entrypoints.websecure.address=:443
       - --entrypoints.websecure.http.tls=true
       - --entrypoints.websecure.http.tls.certResolver=leresolver
-      - --entrypoints.websecure.http.tls.domains[0].main=${DOMAIN}
-      - --entrypoints.websecure.http.tls.domains[0].sans=*.${DOMAIN}
+      - --entrypoints.websecure.http.tls.domains[0].main=${domain}
+      - --entrypoints.websecure.http.tls.domains[0].sans=*.${domain}
       - --certificatesresolvers.leresolver.acme.dnschallenge.provider=ionos
       - --certificatesresolvers.leresolver.acme.dnschallenge.delaybeforecheck=0
       - --certificatesresolvers.leresolver.acme.dnschallenge.resolvers=1.1.1.1:53,1.0.0.1:53
-      - --certificatesresolvers.leresolver.acme.email=${LE_MAIL}
+      - --certificatesresolvers.leresolver.acme.email=${le_mail}
       - --certificatesresolvers.leresolver.acme.storage=/letsencrypt/acme.json
       - --certificatesresolvers.leresolver.acme.keytype=RSA4096
     environment:
@@ -58,7 +58,7 @@ services:
       - "443:443"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.traefik.rule=Host(\"traefik.${DOMAIN}\")"
+      - "traefik.http.routers.traefik.rule=Host(\"traefik.${domain}\")"
       - "traefik.http.services.traefik.loadbalancer.server.port=8080"
       - "traefik.http.routers.traefik.entrypoints=websecure"
     volumes:
@@ -80,7 +80,7 @@ services:
       - './data/portainer:/data'
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.portainer.rule=Host(\"portainer.${DOMAIN}\")"
+      - "traefik.http.routers.portainer.rule=Host(\"portainer.${domain}\")"
       - "traefik.http.services.portainer.loadbalancer.server.port=9000"
       - "traefik.http.routers.portainer.entrypoints=websecure"
     networks:
@@ -108,11 +108,11 @@ services:
       - SMTP_SSL=True
       - SMTP_USERNAME_FILE=/run/secrets/bitwarden_smtp_user
       - SMTP_PASSWORD_FILE=/run/secrets/bitwarden_smtp_password
-      - DOMAIN=https://bitwarden.${DOMAIN}
+      - DOMAIN=https://bitwarden.${domain}
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.bitwarden.loadbalancer.server.port=80"
-      - "traefik.http.routers.bitwarden.rule=Host(\"bitwarden.${DOMAIN}\")"
+      - "traefik.http.routers.bitwarden.rule=Host(\"bitwarden.${domain}\")"
       - "traefik.http.routers.bitwarden.entrypoints=websecure"
     networks:
       dockernet:
@@ -132,7 +132,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.checkmk.loadbalancer.server.port=5000"
-      - "traefik.http.routers.checkmk.rule=Host(\"checkmk.${DOMAIN}\")"
+      - "traefik.http.routers.checkmk.rule=Host(\"checkmk.${domain}\")"
       - "traefik.http.routers.checkmk.entrypoints=websecure"
     networks:
       dockernet:
@@ -155,7 +155,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.speedtest.loadbalancer.server.port=80"
-      - "traefik.http.routers.speedtest.rule=Host(\"speedtest.${DOMAIN}\")"
+      - "traefik.http.routers.speedtest.rule=Host(\"speedtest.${domain}\")"
       - "traefik.http.routers.speedtest.entrypoints=websecure"
     networks:
       dockernet:
