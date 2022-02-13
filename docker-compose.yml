@@ -118,8 +118,7 @@ services:
       dockernet:
         ipv4_address: 172.18.0.4
   checkmk:
-    image: 'checkmk/$(echo "${checkmk_edition%-docker}"):${checkmk_version}'
-    # image: 'checkmk/${checkmk_edition}:${checkmk_version}'
+    image: 'checkmk/${checkmk_edition}:${checkmk_version}'
     container_name: 'checkmk'
     hostname: 'checkmk'
     restart: 'unless-stopped'
