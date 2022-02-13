@@ -1,6 +1,6 @@
 #!/bin/bash
 blue=`tput setaf 4` # use color
-reset=`tput sgr0`
+reset=`tput sgr0` # reset color
 
 echo -e "${blue}loading variables '.env'${reset}"
 . .env
