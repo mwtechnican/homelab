@@ -9,11 +9,20 @@ echo "LE_MAIL=$LE_MAIL" >> .env
 read -r -p "docker host ip: " SERVERIP
 echo "SERVERIP=$SERVERIP" >> .env
 
+read -r -p "checkmk edition [check-mk-free-docker]: " checkmk_edition
+checkmk_edition=${checkmk_edition:-check-mk-free-docker}
+echo "checkmk_edition=$checkmk_edition" >> .env
+echo ""
+
+read -r -p "checkmk version: " checkmk_edition
+echo "checkmk_edition=$checkmk_edition" >> .env
+
 read -r -p "install nextcloud containers? [false]: " install_nextcloud
 install_nextcloud=${install_nextcloud:-false}
 echo "install_nextcloud=$install_nextcloud" >> .env
 echo ""
-# echo -e "loading variables '.env'"
+
+echo -e "loading variables '.env'"
 . .env
 
 echo -e "now enter the secrets which should be used for the containers"
