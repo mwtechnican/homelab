@@ -2,57 +2,58 @@ version: "3.9"
 ##################################################################
 networks:
   dockernet:
-    name: dockernet
+    name: "dockernet"
     external: true
 
 ##################################################################
 secrets:
   #----------------------------------------------------#
-  ionos_api_key:
-    file: ./secrets/ionos_api_key
+  IONOS_API_KEY:
+    file: "./secrets/ionos_api_key"
   #----------------------------------------------------#
   bitwarden_admin_token:
-    file: ./secrets/bitwarden_admin_token
+    file: "./secrets/bitwarden_admin_token"
   bitwarden_smtp_host:
-    file: ./secrets/smtp_host
+    file: "./secrets/smtp_host"
   bitwarden_smtp_user:
-    file: ./secrets/smtp_user
+    file: "./secrets/smtp_user"
   bitwarden_smtp_password:
-    file: ./secrets/smtp_password
+    file: "./secrets/smtp_password"
   #----------------------------------------------------#
 
 ##################################################################
 services:
   traefik:
     image: "traefik:latest"
-    container_name: 'traefik'
-    hostname: 'traefik'
-    restart: 'unless-stopped'
+    container_name: "traefik"
+    hostname: "traefik"
+    restart: "unless-stopped"
     command:
-      - --log.level=Error
-      - --api.insecure=true
-      - --providers.docker=true
-      - --providers.docker.exposedbydefault=false
-      - --providers.docker.watch=true
-      - --providers.docker.endpoint=unix:///var/run/docker.sock
-      - --entrypoints.web.address=:80
-      - --entrypoints.web.http.redirections.entryPoint.to=websecure
-      - --entrypoints.web.http.redirections.entryPoint.scheme=https
-      - --entrypoints.websecure.address=:443
-      - --entrypoints.websecure.http.tls=true
-      - --entrypoints.websecure.http.tls.certResolver=leresolver
-      - --entrypoints.websecure.http.tls.domains[0].main=${domain}
-      - --entrypoints.websecure.http.tls.domains[0].sans=*.${domain}
-      - --certificatesresolvers.leresolver.acme.dnschallenge.provider=ionos
-      - --certificatesresolvers.leresolver.acme.dnschallenge.delaybeforecheck=0
-      - --certificatesresolvers.leresolver.acme.dnschallenge.resolvers=1.1.1.1:53,1.0.0.1:53
-      - --certificatesresolvers.leresolver.acme.email=${le_mail}
-      - --certificatesresolvers.leresolver.acme.storage=/letsencrypt/acme.json
-      - --certificatesresolvers.leresolver.acme.keytype=RSA4096
+      - "--log.level=Error"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.watch=true"
+      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.websecure.http.tls=true"
+      - "--entrypoints.websecure.http.tls.certResolver=leresolver"
+      - "--entrypoints.websecure.http.tls.domains[0].main=${domain}"
+      - "--entrypoints.websecure.http.tls.domains[0].sans=*.${domain}"
+      - "--certificatesresolvers.leresolver.acme.dnschallenge.provider=ionos"
+      - "--certificatesresolvers.leresolver.acme.dnschallenge.delaybeforecheck=0"
+      - "--certificatesresolvers.leresolver.acme.dnschallenge.resolvers=1.1.1.1:53,1.0.0.1:53"
+      # - "--certificatesresolvers.leresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory" # testing
+      - "--certificatesresolvers.leresolver.acme.email=${le_mail}"
+      - "--certificatesresolvers.leresolver.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.leresolver.acme.keytype=RSA4096"
     environment:
-      - IONOS_API_KEY_FILE=/run/secrets/ionos_api_key
+      - "IONOS_API_KEY_FILE=/run/secrets/IONOS_API_KEY"
     secrets:
-      - ionos_api_key
+      - "IONOS_API_KEY"
     ports:
       - "80:80"
       - "443:443"
@@ -62,22 +63,22 @@ services:
       - "traefik.http.services.traefik.loadbalancer.server.port=8080"
       - "traefik.http.routers.traefik.entrypoints=websecure"
     volumes:
-      - ./data/traefik/letsencrypt:/letsencrypt
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./data/traefik/rules:/rules
-      - ./data/traefik/traefik.log:/traefik.log
-      - ./data/traefik/shared:/shared
+      - "./data/traefik/letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./data/traefik/rules:/rules"
+      - "./data/traefik/traefik.log:/traefik.log"
+      - "./data/traefik/shared:/shared"
     networks:
       dockernet:
         ipv4_address: 172.18.0.2
   portainer:
-    image: 'portainer/portainer-ce:latest'
-    container_name: 'portainer'
-    hostname: 'portainer'
-    restart: 'unless-stopped'
+    image: "portainer/portainer-ce:latest"
+    container_name: "portainer"
+    hostname: "portainer"
+    restart: "unless-stopped"
     volumes:
-      - '/var/run/docker.sock:/var/run/docker.sock'
-      - './data/portainer:/data'
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./data/portainer:/data"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.portainer.rule=Host(\"portainer.${domain}\")"
@@ -87,28 +88,28 @@ services:
       dockernet:
         ipv4_address: 172.18.0.3
   bitwarden:
-    image: 'vaultwarden/server:latest'
-    container_name: 'bitwarden'
-    hostname: 'bitwarden'
-    restart: 'unless-stopped'
+    image: "vaultwarden/server:latest"
+    container_name: "bitwarden"
+    hostname: "bitwarden"
+    restart: "unless-stopped"
     volumes:
-       - './data/bitwarden:/data'
+       - "./data/bitwarden:/data"
     secrets:
-      - bitwarden_admin_token
-      - bitwarden_smtp_user
-      - bitwarden_smtp_password
-      - bitwarden_smtp_host
+      - "bitwarden_admin_token"
+      - "bitwarden_smtp_user"
+      - "bitwarden_smtp_password"
+      - "bitwarden_smtp_host"
     environment:
-      - ADMIN_TOKEN_FILE=/run/secrets/bitwarden_admin_token
-      - WEBSOCKET_ENABLED=true
-      - SIGNUPS_ALLOWED=false
-      - SMTP_HOST_FILE=/run/secrets/bitwarden_smtp_host
-      - SMTP_FROM_FILE=/run/secrets/bitwarden_smtp_user
-      - SMTP_PORT=587
-      - SMTP_SSL=True
-      - SMTP_USERNAME_FILE=/run/secrets/bitwarden_smtp_user
-      - SMTP_PASSWORD_FILE=/run/secrets/bitwarden_smtp_password
-      - DOMAIN=https://bitwarden.${domain}
+      - "ADMIN_TOKEN_FILE=/run/secrets/bitwarden_admin_token"
+      - "WEBSOCKET_ENABLED=true"
+      - "SIGNUPS_ALLOWED=false"
+      - "SMTP_HOST_FILE=/run/secrets/bitwarden_smtp_host"
+      - "SMTP_FROM_FILE=/run/secrets/bitwarden_smtp_user"
+      - "SMTP_PORT=587"
+      - "SMTP_SSL=True"
+      - "SMTP_USERNAME_FILE=/run/secrets/bitwarden_smtp_user"
+      - "SMTP_PASSWORD_FILE=/run/secrets/bitwarden_smtp_password"
+      - "DOMAIN=https://bitwarden.${domain}"
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.bitwarden.loadbalancer.server.port=80"
@@ -118,17 +119,17 @@ services:
       dockernet:
         ipv4_address: 172.18.0.4
   checkmk:
-    image: 'checkmk/${checkmk_edition}:${checkmk_version}'
-    container_name: 'checkmk'
-    hostname: 'checkmk'
-    restart: 'unless-stopped'
+    image: "checkmk/${checkmk_edition}:${checkmk_version}"
+    container_name: "checkmk"
+    hostname: "checkmk"
+    restart: "unless-stopped"
     ports:
       - "6557:6557"
     tmpfs:
-      - /opt/omd/sites/cmk/tmp:uid=1000,gid=1000
+      - "/opt/omd/sites/cmk/tmp:uid=1000,gid=1000"
     volumes:
-       - ./data/checkmk:/omd/sites
-       - /etc/localtime:/etc/localtime:ro
+       - "./data/checkmk:/omd/sites"
+       - "/etc/localtime:/etc/localtime:ro"
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.checkmk.loadbalancer.server.port=5000"
@@ -138,15 +139,15 @@ services:
       dockernet:
         ipv4_address: 172.18.0.5
   speedtest:
-    image: henrywhitaker3/speedtest-tracker
-    container_name: 'speedtest'
-    hostname: 'speedtest'
-    restart: 'unless-stopped'
+    image: "henrywhitaker3/speedtest-tracker"
+    container_name: "speedtest"
+    hostname: "speedtest"
+    restart: "unless-stopped"
     volumes:
-      - ./data/speedtest:/config
+      - "./data/speedtest:/config"
     environment:
-      - TZ=Europe/Berlin
-      - OOKLA_EULA_GDPR=true
+      - "TZ=Europe/Berlin"
+      - "OOKLA_EULA_GDPR=true"
     logging:
       driver: "json-file"
       options:
