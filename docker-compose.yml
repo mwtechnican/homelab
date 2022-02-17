@@ -46,7 +46,7 @@ services:
       - "--certificatesresolvers.leresolver.acme.dnschallenge.provider=ionos"
       - "--certificatesresolvers.leresolver.acme.dnschallenge.delaybeforecheck=0"
       - "--certificatesresolvers.leresolver.acme.dnschallenge.resolvers=1.1.1.1:53,1.0.0.1:53"
-      # - "--certificatesresolvers.leresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory" # testing
+      - "--certificatesresolvers.leresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory" # testing
       - "--certificatesresolvers.leresolver.acme.email=${le_mail}"
       - "--certificatesresolvers.leresolver.acme.storage=/letsencrypt/acme.json"
       - "--certificatesresolvers.leresolver.acme.keytype=RSA4096"
@@ -71,6 +71,8 @@ services:
     networks:
       dockernet:
         ipv4_address: 172.18.0.2
+    dns:
+      - "10.0.0.254"
   portainer:
     image: "portainer/portainer-ce:latest"
     container_name: "portainer"
@@ -87,6 +89,8 @@ services:
     networks:
       dockernet:
         ipv4_address: 172.18.0.3
+    dns:
+      - "10.0.0.254"
   bitwarden:
     image: "vaultwarden/server:latest"
     container_name: "bitwarden"
@@ -118,6 +122,8 @@ services:
     networks:
       dockernet:
         ipv4_address: 172.18.0.4
+    dns:
+      - "10.0.0.254"
   checkmk:
     image: "checkmk/${checkmk_edition}:${checkmk_version}"
     container_name: "checkmk"
@@ -138,6 +144,8 @@ services:
     networks:
       dockernet:
         ipv4_address: 172.18.0.5
+    dns:
+      - "10.0.0.254"
   speedtest:
     image: "henrywhitaker3/speedtest-tracker"
     container_name: "speedtest"
@@ -161,3 +169,5 @@ services:
     networks:
       dockernet:
         ipv4_address: 172.18.0.6
+    dns:
+      - "10.0.0.254"
