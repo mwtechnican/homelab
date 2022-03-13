@@ -20,5 +20,4 @@ if [ $install_nextcloud = 'true' ]; then
     docker-compose -f docker-compose-nextcloud.yml -p home-nextcloud pull --ignore-pull-failures
     docker-compose -f docker-compose-nextcloud.yml -p home-nextcloud up -d
 fi
-docker image prune -f
 echo ""
