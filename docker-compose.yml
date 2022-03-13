@@ -4,6 +4,8 @@ networks:
   dockernet:
     name: "dockernet"
     external: true
+  paperlessnet:
+    name: "paperlessnet"
 
 ##################################################################
 secrets:
@@ -20,6 +22,13 @@ secrets:
   bitwarden_smtp_password:
     file: "./secrets/smtp_password"
   #----------------------------------------------------#
+  paperless_db_name:
+    file: "./secrets/paperless_db_name"
+  paperless_db_user:
+    file: "./secrets/paperless_db_user"
+  paperless_db_password:
+    file: "./secrets/paperless_db_password"
+  #----------------------------------------------------#
 
 ##################################################################
 services:
@@ -31,10 +40,13 @@ services:
     command:
       - "--log.level=Error"
       - "--api.insecure=true"
+      ### docker provider ###
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--providers.docker.watch=true"
       - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+      - "--providers.docker.network=dockernet"
+      ### entrypoints ###
       - "--entrypoints.web.address=:80"
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
       - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
@@ -43,6 +55,7 @@ services:
       - "--entrypoints.websecure.http.tls.certResolver=leresolver"
       - "--entrypoints.websecure.http.tls.domains[0].main=${domain}"
       - "--entrypoints.websecure.http.tls.domains[0].sans=*.${domain}"
+      ### certificateresolvers ###
       - "--certificatesresolvers.leresolver.acme.dnschallenge.provider=ionos"
       - "--certificatesresolvers.leresolver.acme.dnschallenge.delaybeforecheck=0"
       - "--certificatesresolvers.leresolver.acme.dnschallenge.resolvers=1.1.1.1:53,1.0.0.1:53"
@@ -169,5 +182,76 @@ services:
     networks:
       dockernet:
         ipv4_address: 172.18.0.6
+    dns:
+      - "10.0.0.254"
+  paperless-broker:
+    image: redis:6.0
+    container_name: paperless-broker
+    hostname: paperless-broker
+    restart: unless-stopped
+    volumes:
+      - ./data/paperless/broker-data:/data
+    networks:
+      paperlessnet:
+    dns:
+      - "10.0.0.254"
+  paperless-db:
+    image: postgres:13
+    container_name: paperless-db
+    hostname: paperless-db
+    restart: unless-stopped
+    volumes:
+      - ./data/paperless/db-data:/var/lib/postgresql/data
+    secrets:
+      - paperless_db_name
+      - paperless_db_user
+      - paperless_db_password
+    environment:
+      - POSTGRES_DB_FILE=/run/secrets/paperless_db_name
+      - POSTGRES_USER_FILE=/run/secrets/paperless_db_user
+      - POSTGRES_PASSWORD_FILE=/run/secrets/paperless_db_password
+    networks:
+      paperlessnet:
+    dns:
+      - "10.0.0.254"
+  paperless-webserver:
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    container_name: paperless-webserver
+    hostname: paperless-webserver
+    restart: unless-stopped
+    depends_on:
+      - paperless-broker
+      - paperless-db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - ./data/paperless/webserver-data:/usr/src/paperless/data
+      - ./data/paperless/webserver-media:/usr/src/paperless/media
+      - ./data/paperless/webserver-export:/usr/src/paperless/export
+      - ./data/paperless/webserver-consume:/usr/src/paperless/consume
+    secrets:
+      - paperless_db_name
+      - paperless_db_user
+      - paperless_db_password
+    environment:
+      - PAPERLESS_REDIS=redis://paperless-broker:6379
+      - PAPERLESS_DBHOST=paperless-db
+      - PAPERLESS_DBNAME_FILE=/run/secrets/paperless_db_name
+      - PAPERLESS_DBUSER_FILE=/run/secrets/paperless_db_user
+      - PAPERLESS_DBPASS_FILE=/run/secrets/paperless_db_password
+      - PAPERLESS_TIME_ZONE=Europe/Berlin
+      - PAPERLESS_OCR_LANGUAGE=deu
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.paperless-webserver.loadbalancer.server.port=8000"
+      - "traefik.http.routers.paperless-webserver.rule=Host(\"paperless.${domain}\")"
+      - "traefik.http.routers.paperless-webserver.entrypoints=websecure"
+    networks:
+      paperlessnet:
+      dockernet:
+        ipv4_address: 172.18.0.7
     dns:
       - "10.0.0.254"
