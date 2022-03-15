@@ -202,15 +202,12 @@ services:
     restart: unless-stopped
     volumes:
       - ./data/paperless/db-data:/var/lib/postgresql/data
-    # secrets:
-    #   - "paperless_db_user"
-    #   - "paperless_db_password"
+    secrets:
+      - "paperless_db_user"
+      - "paperless_db_password"
     environment:
-      # - "POSTGRES_USER_FILE=/run/secrets/paperless_db_user"
-      # - "POSTGRES_PASSWORD_FILE=/run/secrets/paperless_db_password"
-      POSTGRES_DB: paperless
-      POSTGRES_USER: paperless
-      POSTGRES_PASSWORD: paperless
+      - "POSTGRES_USER_FILE=/run/secrets/paperless_db_user"
+      - "POSTGRES_PASSWORD_FILE=/run/secrets/paperless_db_password"
     networks:
       paperlessnet:
     dns:
@@ -233,18 +230,14 @@ services:
       - ./data/paperless/webserver-media:/usr/src/paperless/media
       - ./data/paperless/webserver-export:/usr/src/paperless/export
       - ./data/paperless/webserver-consume:/usr/src/paperless/consume
-    # secrets:
-    #   - "paperless_db_user"
-    #   - "paperless_db_password"
+    secrets:
+      - "paperless_db_user"
+      - "paperless_db_password"
     environment:
-      PAPERLESS_REDIS: redis://paperless-broker:6379
-      PAPERLESS_DBHOST: paperless-db
-      # - "PAPERLESS_DBNAME_FILE=/run/secrets/paperless_db_user"
-      # - "PAPERLESS_DBUSER_FILE=/run/secrets/paperless_db_user"
-      # - "PAPERLESS_DBPASS_FILE=/run/secrets/paperless_db_password"
-      PAPERLESS_TIME_ZONE: Europe/Berlin
-      PAPERLESS_OCR_LANGUAGE: deu
-      PAPERLESS_FILENAME_FORMAT: "{created_year}/{correspondent}/{asn}-{title}"
+      - "PAPERLESS_REDIS=redis://paperless-broker:6379"
+      - "PAPERLESS_DBHOST=paperless-db"
+      - "PAPERLESS_DBUSER_FILE=/run/secrets/paperless_db_user"
+      - "PAPERLESS_DBPASS_FILE=/run/secrets/paperless_db_password"
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.paperless-webserver.loadbalancer.server.port=8000"
