@@ -213,11 +213,6 @@ services:
       - ./data/paperless/webserver-media:/usr/src/paperless/media
       - ./data/paperless/webserver-export:/usr/src/paperless/export
       - ./data/paperless/webserver-consume:/usr/src/paperless/consume
-    environment:
-      - "PAPERLESS_REDIS=redis://paperless-broker:6379"
-      - "PAPERLESS_DBHOST=paperless-db"
-      - "PAPERLESS_DBUSER_FILE=POSTGRES_USER"
-      - "PAPERLESS_DBPASS_FILE=POSTGRES_PASSWORD"
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.paperless-webserver.loadbalancer.server.port=8000"
