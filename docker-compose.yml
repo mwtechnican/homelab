@@ -245,9 +245,8 @@ services:
       - ADVERTISE_IP=https://plex.${domain}:443/
     volumes:
       - ./data/plex/config:/config
-      - ./data/plex/mnt/music:/data/Music
-      - ./data/plex/mnt/movies:/data/Movies
-      - ./data/plex/mnt/tv:/data/TV
+      - ./data/plex/mnt/seagate-3tb:/data/seagate-3tb
+      - ./data/plex/mnt/seagate-8tb:/data/seagate-8tb
       - ./data/plex/transcode:/transcode
     labels:
       - "traefik.enable=true"
