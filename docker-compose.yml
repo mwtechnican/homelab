@@ -49,7 +49,7 @@ services:
       - "--certificatesresolvers.leresolver.acme.dnschallenge.provider=ionos"
       - "--certificatesresolvers.leresolver.acme.dnschallenge.delaybeforecheck=0"
       - "--certificatesresolvers.leresolver.acme.dnschallenge.resolvers=1.1.1.1:53,1.0.0.1:53"
-      - "--certificatesresolvers.leresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory" # testing
+      # - "--certificatesresolvers.leresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory" # testing
       - "--certificatesresolvers.leresolver.acme.email=${le_mail}"
       - "--certificatesresolvers.leresolver.acme.storage=/letsencrypt/acme.json"
       - "--certificatesresolvers.leresolver.acme.keytype=RSA4096"
@@ -106,7 +106,7 @@ services:
       - "WEBSOCKET_ENABLED=true"
       - "SIGNUPS_ALLOWED=false"
       - "SMTP_HOST_FILE=/run/secrets/bitwarden_smtp_host"
-      - "SMTP_FROM_FILE=/run/secrets/bitwarden_smtp_user"
+      - "SMTP_FROM=bitwarden@${domain}"
       - "SMTP_PORT=587"
       - "SMTP_SSL=True"
       - "SMTP_USERNAME_FILE=/run/secrets/bitwarden_smtp_user"
