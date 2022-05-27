@@ -1,7 +1,7 @@
 #!/bin/bash
 . .env
 echo "loading checkmk image"
-bash scripts/get_checkmk_image.sh $checkmk_edition $checkmk_version
+# bash scripts/get_checkmk_image.sh $checkmk_edition $checkmk_version
 
 echo "updating containers used in stack 'home-lab'"
 docker compose -f docker-compose.yml -p home-lab pull --ignore-pull-failures

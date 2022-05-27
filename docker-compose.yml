@@ -129,6 +129,7 @@ services:
     restart: "unless-stopped"
     ports:
       - "6557:6557"
+      - "8000:8000"
     tmpfs:
       - "/opt/omd/sites/cmk/tmp:uid=1000,gid=1000"
     volumes:
