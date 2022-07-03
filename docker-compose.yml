@@ -6,8 +6,6 @@ networks:
     external: true
   paperlessnet:
     name: "paperlessnet"
-  taiganet:
-    name: "taiganet"
 
 ##################################################################
 secrets:
@@ -126,7 +124,7 @@ services:
     dns:
       - "10.0.0.254"
   checkmk:
-    image: "checkmk/${checkmk_edition}:${checkmk_version}"
+    image: "checkmk/check-mk-free:latest"
     container_name: "checkmk"
     hostname: "checkmk"
     restart: "unless-stopped"
